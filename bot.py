@@ -8,7 +8,7 @@ TELEGRAM_TOKEN = '8414276375:AAHvTA7x1ueZSutA1yds-YGqg6nRiHY9oVw'
 GEMINI_API_KEY = 'AIzaSyAtGCC6uOFgozWU7efJmiFHXL4CL7ZBM84'
 
 # Gemini Setup
-genai.configure(api_key= AIzaSyAtGCC6uOFgozWU7efJmiFHXL4CL7ZBM84)
+genai.configure(api_key="AiZaSyAtGCC6uDFgozwU7efJmiFHXL4CL7ZBM84")
 model = genai.GenerativeModel('gemini-1.5-flash')
 
 # Updated System Prompt for Friendly & Expert Knowledge
