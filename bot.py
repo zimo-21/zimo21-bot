@@ -64,9 +64,8 @@ def main_bot():
     application.run_polling()
 
 # 5. Execution (Threading ka sahi tarika)
-if __name__ == '__main__':
-    # Pehle Telegram Bot ko ek alag raste (thread) par chalao
-    t = threading.Thread(target=main_bot)
-    t.start()
-    # Phir Flask ko chalao taaki Render "Live" status dikhata rahe
-    run_flask()
+# Threading start
+t = threading.Thread(target=main_bot)
+t.start()
+# Flask start
+run_flask()
