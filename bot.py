@@ -1,34 +1,28 @@
 import os
 from flask import Flask
 import threading
-import os
+import google.generativeai as genai
+from telegram import Update
+from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
+# 1. Flask Setup (Render ko khush rakhne ke liye)
 app = Flask('')
 
 @app.route('/')
 def home():
     return "Bot is Alive!"
 
-def run():
+def run_flask():
     port = int(os.environ.get("PORT", 8080))
     app.run(host='0.0.0.0', port=port)
 
-# Isse bot ke saath ek dummy server chalu ho jayega
-threading.Thread(target=run).start()
+# 2. Keys Setup
+TELEGRAM_TOKEN = "8414276375:AAHVTaTxlueZSutA1yds-YGggOnRlHY9oVw"
+GEMINI_API_KEY = "AIzaSyAtGCC6u8FgoxW67efJm1FHXL4CL7Z0M84"
 
-import google.generativeai as genai
-from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-
-# --- KEYS (Replace these) ---
-TELEGRAM_TOKEN = '8414276375:AAHvTA7x1ueZSutA1yds-YGqg6nRiHY9oVw'
-GEMINI_API_KEY = 'AIzaSyAtGCC6uOFgozWU7efJmiFHXL4CL7ZBM84'
-
-# Gemini Setup
-genai.configure(api_key="AiZaSyAtGCC6uDFgozwU7efJmiFHXL4CL7ZBM84")
+genai.configure(api_key=GEMINI_API_KEY)
 model = genai.GenerativeModel('gemini-1.5-flash')
 
-# Updated System Prompt for Friendly & Expert Knowledge
 SYSTEM_PROMPT = (
     "You are zimo21_bot, a friendly and extremely smart AI teacher. "
     "1. Be a friend to the user but provide 100% accurate, NCERT-based answers. "
@@ -37,10 +31,11 @@ SYSTEM_PROMPT = (
     "4. Language: Use a mix of Hindi and English (Hinglish) to keep it natural."
 )
 
+# 3. Bot Functions
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_name = update.effective_user.first_name
     msg = (
-        f"Hey {user_name}! Main hoon **zimo21_bot** 🥰\n\n"
+        f"Hey {user_name}! Main hoon **zimo21_bot** \n\n"
         "Main aapka best friend aur teacher dono hoon! Aap mujhse Class 1 se 10 tak ke "
         "sabhi questions puch sakte hain, ya phir bas dosti waali baatein bhi kar sakte hain.\n\n"
         "**Main kya kar sakta hoon?**\n"
@@ -55,20 +50,24 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def handle_chat(update: Update, context: ContextTypes.DEFAULT_TYPE):
     user_input = update.message.text
     await context.bot.send_chat_action(chat_id=update.effective_chat.id, action="typing")
-
     try:
-        # Sending context + user query to AI
         response = model.generate_content(f"{SYSTEM_PROMPT}\n\nUser: {user_input}")
         await update.message.reply_text(response.text, parse_mode='Markdown')
     except Exception as e:
         await update.message.reply_text("Arre yaar, lagta hai signal thoda weak hai. Ek baar fir se pucho?")
 
-def main():
-    app = Application.builder().token(TELEGRAM_TOKEN).build()
-    app.add_handler(CommandHandler("start", start))
-    app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_chat))
-    print("zimo21_bot is live and friendly!")
-    app.run_polling()
+# 4. Main Function
+def main_bot():
+    print("Bot is starting...")
+    application = Application.builder().token(TELEGRAM_TOKEN).build()
+    application.add_handler(CommandHandler("start", start))
+    application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_chat))
+    application.run_polling()
 
+# 5. Execution (Threading ka sahi tarika)
 if __name__ == '__main__':
-    main()
+    # Pehle Telegram Bot ko ek alag raste (thread) par chalao
+    t = threading.Thread(target=main_bot)
+    t.start()
+    # Phir Flask ko chalao taaki Render "Live" status dikhata rahe
+    run_flask()
