@@ -61,7 +61,7 @@ def main_bot():
     application = Application.builder().token(TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", start))
     application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_chat))
-    application.run_polling()
+    application.run_polling(close_loop=False, stop_signals=None)
 
 # 5. Execution (Threading ka sahi tarika)
 # Threading start
